@@ -10,7 +10,7 @@ import runway
 from runway.data_types import *
 
 
-@runway.setup(options={"style_dir" : file(is_directory=True), "network_type" : category(description="Select network architecture as per checkpoint name", choices=["normal", "dual"], default="normal")})
+@runway.setup(options={"style_dir" : file(is_directory=True), "network_type" : category(description="Network type as per desired style", choices=["normal", "dual"], default="normal")})
 def setup(opts):
 
     ckpt = opts["style_dir"]
@@ -28,8 +28,8 @@ def setup(opts):
 
 command_inputs = {
 "input_image" : image, 
-"alpha_0_normal" : number(description="alpha values for NORMAL", min=0, max=1, step=0.1, default=0),
-"alpha_0_dual" : number(description="alpha values for DUAL", min=-1, max=-0.1, step=0.1, default=-1)
+"alpha_normal" : number(description="Alpha values required to tune the network", min=0, max=1, step=0.1, default=0),
+"alpha_dual" : number(description="Alpha values required additionally for Dual Network Architecture", min=-1, max=-0.1, step=0.1, default=-1)
 }
 command_outputs = {"output_image" : image}
 
@@ -59,4 +59,4 @@ def stylize_image(model, inputs):
     return {"output_image" : output_image}
 
 if __name__ == "__main__":
-    runway.run(model_options={"style_dir" : "trained_nets/colors_to_waterfall_normal", "network_type" : "normal"})
+    runway.run()
