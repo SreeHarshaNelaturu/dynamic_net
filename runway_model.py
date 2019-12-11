@@ -5,19 +5,20 @@ import utils.utils as utils
 import torch
 import PIL.Image as Image
 import torchvision.transforms as transforms
-
+import ast
 import runway
 from runway.data_types import *
 
 
-@runway.setup(options={"style_dir" : file(is_directory=True), "network_type" : category(description="Network type as per desired style", choices=["normal", "dual"], default="normal")})
+@runway.setup(options={"style_dir" : file(is_directory=True)})
 def setup(opts):
 
     ckpt = opts["style_dir"]
     model_path = ckpt + "/" + "model_dir/dynamic_net.pth"
-    set_net_version = opts["network_type"]
-    config_path = ckpt + "/" + "config.txt"
-    print(model_path)
+    config_path = ckpt + "/" + "config.json"
+    
+    conf = json.load(open(config_path))
+    set_net_version = conf["network_type"]
     opt = config.get_configurations()
 
     dynamic_model = InferenceModel(opt, set_net_version=set_net_version)
@@ -44,13 +45,14 @@ def stylize_image(model, inputs):
     input_tensor = model["dynamic_model"].normalize(input_tensor)
     input_tensor = input_tensor.expand(1, -1, -1, -1)
     
-    alpha0_normal = inputs["alpha_0_normal"]
-    alpha0_dual = inputs["alpha_0_dual"]
+    alpha0_normal = inputs["alpha_normal"]
+    alpha0_dual = inputs["alpha_dual"]
     
     alpha_0 = alpha0_normal
 
 
     if model["network_type"] == "dual":
+        print("Using Dual Alpha")
         alpha_0 = alpha0_dual + alpha0_normal
 
     output_tensor = model["dynamic_model"].forward_and_recover(input_tensor.requires_grad_(False), alpha_0=alpha_0, alpha_1=None, alpha_2=None)
@@ -59,4 +61,4 @@ def stylize_image(model, inputs):
     return {"output_image" : output_image}
 
 if __name__ == "__main__":
-    runway.run()
+    runway.run(model_options={"style_dir" : "trained_nets/normal_mosaic_rain"})
