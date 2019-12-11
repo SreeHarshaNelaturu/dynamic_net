@@ -29,8 +29,7 @@ def setup(opts):
 
 command_inputs = {
 "input_image" : image, 
-"alpha_normal" : number(description="Alpha values required to tune the network", min=0, max=1, step=0.1, default=0),
-"alpha_dual" : number(description="Alpha values required additionally for Dual Network Architecture", min=-1, max=-0.1, step=0.1, default=-1)
+"alpha_normal" : number(description="Alpha values required to tune the network", min=0, max=1, step=0.1, default=0)
 }
 command_outputs = {"output_image" : image}
 
@@ -45,15 +44,7 @@ def stylize_image(model, inputs):
     input_tensor = model["dynamic_model"].normalize(input_tensor)
     input_tensor = input_tensor.expand(1, -1, -1, -1)
     
-    alpha0_normal = inputs["alpha_normal"]
-    alpha0_dual = inputs["alpha_dual"]
-    
-    alpha_0 = alpha0_normal
-
-
-    if model["network_type"] == "dual":
-        print("Using Dual Alpha")
-        alpha_0 = alpha0_dual + alpha0_normal
+    alpha0 = inputs["alpha_normal"]
 
     output_tensor = model["dynamic_model"].forward_and_recover(input_tensor.requires_grad_(False), alpha_0=alpha_0, alpha_1=None, alpha_2=None)
     output_image = to_pil_image(output_tensor.clamp(min=0.0, max=1).cpu().squeeze(dim=0))
