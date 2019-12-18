@@ -46,7 +46,7 @@ def stylize_image(model, inputs):
     
     alpha0 = inputs["alpha_normal"]
 
-    output_tensor = model["dynamic_model"].forward_and_recover(input_tensor.requires_grad_(False), alpha_0=alpha_0, alpha_1=None, alpha_2=None)
+    output_tensor = model["dynamic_model"].forward_and_recover(input_tensor.requires_grad_(False), alpha_0=alpha0, alpha_1=None, alpha_2=None)
     output_image = to_pil_image(output_tensor.clamp(min=0.0, max=1).cpu().squeeze(dim=0))
 
     return {"output_image" : output_image}
